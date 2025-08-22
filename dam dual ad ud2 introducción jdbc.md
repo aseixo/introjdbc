@@ -154,7 +154,7 @@ String url = "jdbc:h2:mem:testdb";
 
 ---
 
-### **Versão com repositório DAO**
+### ** Versão com repositório DAO **
 
 Exemplo para usar um **DAO** (Data Access Object), **o `Main` fica limpo e toda a lógica de acesso ao banco de dados fica isolada**.
 
