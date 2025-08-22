@@ -198,7 +198,7 @@ Exemplo para usar um **DAO** (Data Access Object), **o `Main` fica limpo e toda 
 
 ---
 
-## ** Classe modelo: Pessoa.java**
+## **Classe modelo: Pessoa.java**
 
 ```java
 package com.exemplo;
@@ -239,7 +239,7 @@ public class Pessoa {
 
 ---
 
-## ** DAO: PessoaDAO.java**
+## **DAO: PessoaDAO.java**
 
 ```java
 package com.exemplo;
@@ -324,7 +324,7 @@ public class PessoaDAO {
 
 ---
 
-## ** Main.java**
+## **Main.java**
 
 ```java
 package com.exemplo;
