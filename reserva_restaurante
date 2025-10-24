@@ -1,0 +1,91 @@
+Sistema de xestión de reservas en restaurantes con mesas asignadas, onde unha reserva implica múltiples operacións que deben executarse de forma atómica. 
+ 
+Exercicio 
+Estás a desenvolver un programa para un restaurante de alta capacidade que xerencia reservas de mesas. Cada reserva implica: 
+
+    Asignar unha ou varias mesas á persoa clienta segundo o número de comensais.
+    Bloquear temporalmente esas mesas para que non se poidan reservar por outras persoas.
+    Rexistrar a reserva na tabela de reservas.
+    Actualizar o estado das mesas asignadas a “reservada”.
+     
+
+Requisito:
+Implementa un método en Java con JDBC que realice unha reserva de mesa para un cliente. Este método debe: 
+
+    Recibir como parámetros: o ID do cliente, a data/hora da reserva e o número de comensais.
+    Determinar automáticamente as mesas dispoñibles que poden acomodar ao grupo (p.ex., unha mesa de 4 ou dúas mesas de 2).
+    Se non hai mesas axeitadas dispoñibles, non se debe realizar ningunha modificación na base de datos.
+    Se hai mesas axeitadas:
+        Inserir un novo rexistro na táboa reservas.
+        Actualizar o estado das mesas seleccionadas a "reservada" na táboa mesas.
+         
+    Todo debe executarse dentro dunha transacción: se falla calquera paso (por exemplo, non hai mesas dispoñibles, erro de inserción, etc.), debe facerse rollback para deixar a base de datos nun estado consistente.
+     
+
+Obxectivo:
+Demostrar o uso correcto de transaccións con JDBC (setAutoCommit(false), commit(), rollback()), garantindo a integridade referencial e a consistencia dos datos. 
+
+---
+-- Eliminar bases de datos e táboas se existen
+DROP DATABASE IF EXISTS restaurante_reservas;
+CREATE DATABASE restaurante_reservas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE restaurante_reservas;
+
+-- Táboa de clientes
+CREATE TABLE clientes (
+    id_cliente INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    telefono VARCHAR(15),
+    email VARCHAR(100)
+);
+
+-- Táboa de mesas
+CREATE TABLE mesas (
+    id_mesa INT PRIMARY KEY AUTO_INCREMENT,
+    capacidade INT NOT NULL CHECK (capacidade BETWEEN 1 AND 10),
+    estado ENUM('dispoñible', 'reservada', 'ocupada') DEFAULT 'dispoñible'
+);
+
+-- Táboa de reservas
+CREATE TABLE reservas (
+    id_reserva INT PRIMARY KEY AUTO_INCREMENT,
+    id_cliente INT NOT NULL,
+    data_reserva DATETIME NOT NULL,
+    num_comensais INT NOT NULL,
+    estado ENUM('activa', 'cancelada', 'completada') DEFAULT 'activa',
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE
+);
+
+-- Táboa de relación entre reservas e mesas (unha reserva pode usar varias mesas)
+CREATE TABLE reserva_mesas (
+    id_reserva INT,
+    id_mesa INT,
+    PRIMARY KEY (id_reserva, id_mesa),
+    FOREIGN KEY (id_reserva) REFERENCES reservas(id_reserva) ON DELETE CASCADE,
+    FOREIGN KEY (id_mesa) REFERENCES mesas(id_mesa) ON DELETE CASCADE
+);
+
+-- Inserción de datos de exemplo
+INSERT INTO clientes (nome, telefono, email) VALUES
+('Ana López', '600123456', 'ana@example.com'),
+('Carlos Méndez', '611234567', 'carlos@example.com');
+
+INSERT INTO mesas (capacidade, estado) VALUES
+(2, 'dispoñible'),
+(2, 'dispoñible'),
+(4, 'dispoñible'),
+(6, 'dispoñible'),
+(4, 'ocupada');
+
+
+------
+NOTAS
+    Debes implementar un algoritmo sinxelo para seleccionar mesas disponíbeis que sumen a capacidade necesaria (p.ex., para 5 comensais: unha mesa de 4 + unha de 2).
+    Usa Connection.setAutoCommit(false) ao comezo do método.
+    Se non se encontran mesas axeitadas, fai rollback() e lanza unha excepción ( personalizada ou non, p.ex., ReservaNoDispoñibleException).
+    Se todo vai ben, fai commit().
+    Non esquezas fechar recursos (PreparedStatement, ResultSet, Connection) co try-with-resources.
+
+
+     
+
